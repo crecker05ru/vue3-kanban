@@ -1,20 +1,27 @@
 <template>
 <section class="kanban">
   <AppModal :isModalOpened="isModalOpened" @close-modal="onCloseModal">
-    <AddTableForm :isEditMode="isEditMode" :editTable="editableTable" @table-updated="onTableUpdated" @table-added="onTableAdded"/>
+    <TableForm :isEditMode="isEditMode" :editTable="editableTable" @table-updated="onTableUpdated" @table-added="onTableAdded"/>
   </AppModal>
-  <div class="kanban__inner flex space-x-4">
+  <AppModal :isModalOpened="kanbanStore.isTaskModalOpened" @close-modal="kanbanStore.switchTaskModalOpened">
+    <TaskForm/>
+  </AppModal>
+  <div class="kanban__inner flex space-x-4" v-if="!kanbanStore.taskDetails">
     <KanbanTable v-for="(table,index) in kanbanStore.tables" 
     :key="table.id" 
     :tableId="table.id" 
     :title="table.name" 
-    :tasks="tasks.filter(task => table.tasksIds.includes(task.id) )"
+    :tasks="kanbanStore.tasks.filter(task => table.tasksIds.includes(task.id) )"
     @move-end="onMoveEnd"
     @drop-end="onDropEnd"
     @edit-table="onEditTable"
+    @create-task="onCreateTask"
     />
     <button @click="onNewTable">New Table</button>
 
+  </div>
+  <div v-else>
+    <TaskDetils/>
   </div>
 
 </section>
@@ -24,53 +31,16 @@ import {ref} from "vue"
 import KanbanTable from "./KanbanTable.vue";
 import { useKanbanStore } from '@/stores/kanban'
 import AppModal from "./AppModal.vue";
-import AddTableForm from "./AddTableForm.vue";
+import TableForm from "./TableForm.vue";
+import TaskForm from "./TaskForm.vue";
+import TaskDetils from "./TaskDetails.vue"
 const kanbanStore = useKanbanStore()
 
-// const tasks = ref(['Прочитать книгу','Продумать архитекутру','Создать переиспользуемый модуль'])
-// const tables = ref(['Todo','In progress','Done'])
-// const tasks = ref([
-//   {
-//   id: 21,
-//   name: 'Прочитать книгу'
-// },
-// {
-//   id: 22,
-//   name: 'Продумать архитекутру'
-// },
-// {
-//   id: 23,
-//   name: 'Создать переиспользуемый модуль'
-// },
-// {
-//   id: 24,
-//   name: 'Написать антифрауд'
-// }
-// ]
-// )
-// const tables = ref([
-// {
-//   id: 1,
-//   name: 'Todo',
-//   tasksIds: [21,22]
-// },
-// {
-//   id: 2,
-//   name: 'In progress',
-//   tasksIds: [23,24]
-// },
-// {
-//   id: 3,
-//   name: 'Done',
-//   tasksIds: []
-// },
-
-// ])
-const tasks = kanbanStore.tasks
 const chosenTableId = ref()
 const currentTableId = ref()
 const selectedTaskId = ref()
 const isModalOpened = ref(false)
+const isTaskModalOpened = ref(false)
 const isEditMode = ref(false)
 const editableTable = ref()
 
@@ -96,8 +66,14 @@ const onEditTable = (tableId) => {
   isEditMode.value = true
   editableTable.value = kanbanStore.tables.find((table) => table.id === tableId)
 }
+const onCreateTask = () => {
+  isTaskModalOpened.value = true
+}
 const onCloseModal = () => {
   isModalOpened.value = false
+}
+const onCloseTaskModal = () => {
+  isTaskModalOpened.value = false
 }
 const cleanEdit = () => {
   isEditMode.value = false

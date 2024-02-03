@@ -41,11 +41,40 @@ export const useKanbanStore = defineStore('kanban', {
     draggedTaskId: 0,
     fromTableId: 0,
     targetTableId: 0,
+    editableTaskId: 0,
+    isTaskModalOpened: false,
+    isTaskEditMode: false,
+    taskDetails: null
+    // editableTask: null
+
   }),
   getters: {
+    // editableTask: (state) => {
+    //   return (taskId) => state.tasks.find((task) => task.id === taskId)
+    // }
+    editableTask: (state) =>state.tasks.find((task) => task.id === state.editableTaskId),
+    taskByTable: (state) => {
+      return (tableId) => {
+        const table = state.tables.find((table) => table.id === tableId)
+        console.log('table',table )
+       return  state.tasks.filter((task) => {
+        return table.tasksIds.includes(task.id)
+      }) 
+    }
+    }
 
   },
   actions: {
+    switchTaskModalOpened(){
+      this.isTaskModalOpened = !this.isTaskModalOpened
+    },
+    switchTaskEditMode(){
+      this.isTaskEditMode = !this.isTaskEditMode
+    },
+    setEditableTask(taskId){
+      this.editableTaskId = taskId
+      // this.editableTask = this.tasks.find((task) => task.id === taskId)
+    },
     setDraggedTaskId(taskId){
       this.draggedTaskId = taskId
     },
@@ -55,22 +84,43 @@ export const useKanbanStore = defineStore('kanban', {
     setTargetTableId(tableId){
       this.targetTableId = tableId
     },
+    setTaskDetails(task){
+      this.taskDetails = task
+    },
+    clearTaskDetails(){
+      this.taskDetails = null
+    },
     addTask(newTask){
+      const mapped = this.tables.map((table) => {
+        if(table.id === this.fromTableId){
+          return {...table,tasksIds: [...table.tasksIds,newTask.id]}
+        }
+        return table
+      })
+      this.tables = mapped
       this.tasks.push(newTask)
+      this.switchTaskModalOpened()
     },
     addTable(newTable){
       this.tables.push(newTable)
     },
     removeTask(taskId){
-      this.tasks.filter((task) => task.id !== taskId)
+      this.tasks = this.tasks.filter((task) => task.id !== taskId)
     },
     removeTable(tableId){
       console.log('removeTable tableId',tableId)
       this.tables = this.tables.filter((table) => table.id !== tableId)
     },
     updateTask(updatedTask){
-      let finded = this.tasks.find((task) => task.id === updatedTask.id)
-      finded = {...finded,...updatedTask}
+      console.log('updatedTask',updatedTask)
+      const mapped = this.tasks.map((task) => {
+        if(task.id === updatedTask.id){
+          console.log('task',task)
+          return {...task,...updatedTask}
+        }
+        return task
+      })
+      this.tasks = mapped
     },
     updateTable(updatedTable){
       console.log('updatedTable',updatedTable)
