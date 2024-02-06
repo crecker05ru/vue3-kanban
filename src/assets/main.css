@@ -1,2 +1,33 @@
 @import './base.css';
 
+.edit-button,.remove-button,.add-button,.update-button,.close-button,.create-button {
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 24px;
+  height: 20px;
+}
+.edit-button-sm,.remove-button-sm {
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 18px;
+  height: 16px;
+}
+.edit-button,.edit-button-sm {
+  background-image: url('./icons/edit.svg');
+
+}
+.remove-button,.remove-button-sm {
+  background-image: url('./icons/cross.svg');
+}
+.add-button  {
+  background-image: url('./icons/plus.svg');
+}
+.update-button {
+  background-image: url('./icons/update.svg');
+}
+.close-button {
+  background-image: url('./icons/close.svg');
+}
+.create-button {
+  background-image: url('./icons/create.svg');
+}
